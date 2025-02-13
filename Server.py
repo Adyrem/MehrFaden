@@ -2,6 +2,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import threading
 
+USE_HTTPS = False
+
 class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
@@ -30,7 +32,12 @@ class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
 
 def run():
     server = ThreadingSimpleServer(('0.0.0.0', 4444), Handler)
-    # Implement HTTPS here once ssl is ready
+    if USE_HTTPS:
+        import ssl
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        # Create keys for example with LetsEncrypt certbot
+        context.load_cert_chain(keyfile='./key.pem', certfile='./cert.pem')
+        server.socket = context.wrap_socket(server.socket, server_side=True)
     server.serve_forever()
 
 if __name__ == '__main__':
