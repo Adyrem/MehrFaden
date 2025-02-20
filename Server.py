@@ -3,6 +3,10 @@ from socketserver import ThreadingMixIn
 import threading
 
 USE_HTTPS = False
+LISTEN_ON_PORT = 4444
+LISTEN_ON_RANGE = '0.0.0.0'
+KEYFILE =  './key.pem'
+CERTFILE = './cert.pem'
 
 class Handler(BaseHTTPRequestHandler):
 
@@ -31,12 +35,12 @@ class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
     SHARED_DICT = {}
 
 def run():
-    server = ThreadingSimpleServer(('0.0.0.0', 4444), Handler)
+    server = ThreadingSimpleServer((LISTEN_ON_RANGE, LISTEN_ON_PORT), Handler)
     if USE_HTTPS:
         import ssl
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         # Create keys for example with LetsEncrypt certbot
-        context.load_cert_chain(keyfile='./key.pem', certfile='./cert.pem')
+        context.load_cert_chain(keyfile=KEYFILE, certfile=CERTFILE)
         server.socket = context.wrap_socket(server.socket, server_side=True)
     server.serve_forever()
 
