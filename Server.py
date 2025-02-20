@@ -1,6 +1,8 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import threading
+import json
+import urllib
 
 USE_HTTPS = False
 LISTEN_ON_PORT = 4444
@@ -11,22 +13,35 @@ CERTFILE = './cert.pem'
 class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
+        query = urllib.parse.urlparse(self.path).query
+        parameters = urllib.parse.parse_qs(query)
+
+        user = parameters["user"][0]
+        key = parameters["key"][0]
 
         # Check if value exists before printing it
         if 'foo' in self.server.SHARED_DICT:
-            self.wfile.write(str(self.server.SHARED_DICT['foo']).encode())
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(json.dumps(self.server.SHARED_DICT).encode())
         else:
-            self.wfile.write(b'Value not found')
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b'Key not found for user')
 
     def do_POST(self):
-        # Exmple for writing to dictionary
+        content_len = int(self.headers.get('Content-Length'))
+        post_body = json.loads(self.rfile.read(content_len))
+
+        user = post_body['user']
+        key = post_body['key']
+        value = post_body['value']
+
         self.server.SHARED_DICT['foo'] = 42
 
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(str(self.server.SHARED_DICT['foo']).encode())
+        self.wfile.write(json.dumps(post_body).encode())
 
 # Shared value store between threads
 # This does not implement any lock
