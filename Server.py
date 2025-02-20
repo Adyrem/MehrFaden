@@ -20,10 +20,10 @@ class Handler(BaseHTTPRequestHandler):
         key = parameters["key"][0]
 
         # Check if value exists before printing it
-        if 'foo' in self.server.SHARED_DICT:
+        if user in self.server.SHARED_DICT and key in self.server.SHARED_DICT[user]:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(json.dumps(self.server.SHARED_DICT).encode())
+            self.wfile.write(str(self.server.SHARED_DICT[user][key]).encode())
         else:
             self.send_response(404)
             self.end_headers()
@@ -37,7 +37,13 @@ class Handler(BaseHTTPRequestHandler):
         key = post_body['key']
         value = post_body['value']
 
-        self.server.SHARED_DICT['foo'] = 42
+        # Write value into dict
+        # Also creates a new session if needed
+        if user in self.server.SHARED_DICT:
+            self.server.SHARED_DICT[user][key] = value
+        else:
+            self.server.SHARED_DICT[user] = {}
+            self.server.SHARED_DICT[user][key] = value
 
         self.send_response(200)
         self.end_headers()
