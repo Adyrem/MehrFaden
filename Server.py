@@ -23,7 +23,7 @@ class Handler(BaseHTTPRequestHandler):
         if user in self.server.SHARED_DICT and key in self.server.SHARED_DICT[user]:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(str(self.server.SHARED_DICT[user][key]).encode())
+            self.wfile.write(json.dumps(self.server.SHARED_DICT[user][key]).encode())
         else:
             self.send_response(404)
             self.end_headers()
