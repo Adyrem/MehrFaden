@@ -10,6 +10,11 @@ MehrFaden ist ein Server-Projekt, das Mehrfach-Threading (Multithreading) nutzt,
    cd MehrFaden
    ```
 
+**Insomnia installieren**
+
+https://docs.insomnia.rest/insomnia/install
+
+
 ## Nutzung
 
 Der Server kann mit folgendem Befehl gestartet werden:
